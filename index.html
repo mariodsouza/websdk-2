@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <link rel="manifest" href="/web-sdk-test/manifest.json">
   <script>
     const personalizedSelectors = ['#bell-selector', '.nav', '#constantOUL', '#testdifferentimg'];
     const delay = 2000; //time in ms;
@@ -28,7 +27,6 @@
           transition: opacity 0.5s, filter 0.5s !important
         }
       `;
-        // Create and append the style element if it doesn't exist
         const styleId = 'flicker-style';
         if (!document.getElementById(styleId)) {
           const styleElement = document.createElement('style');
@@ -50,9 +48,9 @@
                   elements.push(el);
                 }
               })
-              delete retryElements[selector]; // Successfully processed, remove from retry list
+              delete retryElements[selector];
             } else {
-              retryElements[selector] = false; // Add to retry list if not found
+              retryElements[selector] = false;
             }
           })
           applyStyles(elements);
@@ -77,7 +75,7 @@
             el.classList.remove('anti-flicker-hide');
             el.classList.add('anti-flicker-show');
           })
-        }, delayTime) // Apply styles after maxRenderTime
+        }, delayTime)
       }
       function observeUrlChange () {
         let previousHref = document.location.href;
@@ -131,24 +129,16 @@
       //	    wzrk.src = 'https://cdn.jsdelivr.net/gh/CleverTap/clevertap-web-sdk@b9ec8b1a15b14aa44540c5eeb1091909b5719814/clevertap.js';
        // wzrk.src = 'https://cdn.jsdelivr.net/gh/CleverTap/clevertap-web-sdk@09394821ceb5bc7e6051b59d4f5172987e767f35/clevertap.js';
       // wzrk.src = 'https://cdn.jsdelivr.net/gh/CleverTap/clevertap-web-sdk@e770e27fc49f521c2f30206acfaa0a8a27ef725d/clevertap.js';
-      // WEB-3904: Using staging SDK for customId OUL testing (PR #479)
-      wzrk.src = 'https://static.wizrocket.com/staging/task/WEB-3904/customId_OUL/js/clevertap.min.js';
+      // WEB-3904: Staging URL has SSL cert issue, using jsDelivr CDN with PR branch instead
+      // wzrk.src = 'https://static.wizrocket.com/staging/task/WEB-3904/customId_OUL/js/clevertap.min.js';
+      wzrk.src = 'https://cdn.jsdelivr.net/gh/CleverTap/clevertap-web-sdk@task/WEB-3904/customId_OUL/clevertap.js';
 
         wzrk.onload = () => {
-          console.log('loaded');
-          clevertap.notifications.push({
-            apnsWebPushId: "web.com.localhost.pushDemo", //only for safari browser
-            apnsWebPushServiceUrl:
-              "https://us-central1-chetan-s-demo-app.cloudfunctions.net/api", //only for safari browser
-            titleText: "Chetan Would you like to receive Push Notifications?",
-            bodyText:
-              "We promise to only send you relevant content and give you updates on your transactions",
-            okButtonText: "Sign me up!",
-            rejectButtonText: "No thanks",
-            okButtonColor: "#f28046",
-            hidePoweredByCT: true,
-            serviceWorkerPath: '/web-sdk-test/js/clevertap_sw.js',
-          });
+          console.log('CleverTap SDK loaded successfully');
+        }
+
+        wzrk.onerror = () => {
+          console.error('Failed to load CleverTap SDK');
         }
 
         var s = document.getElementsByTagName("script")[0];
@@ -173,6 +163,10 @@
         };
       })();
   </script>
+  <style>
+    .textInput { padding: 4px; margin: 2px; }
+    .inputBtn { padding: 4px 8px; margin: 2px; }
+  </style>
 </head>
 <body>
 <script type="text/javascript">
@@ -395,25 +389,24 @@
       apnsWebPushId: "web.com.localhost.pushDemo",
       apnsWebPushServiceUrl:
         "https://us-central1-chetan-s-demo-app.cloudfunctions.net/api",
-      titleText: "Chetan Would you like to receive Push Notifications?",
+      titleText: "Would you like to receive Push Notifications?",
       bodyText:
         "We promise to only send you relevant content and give you updates on your transactions",
       okButtonText: "Sign me up!",
       rejectButtonText: "No thanks",
       okButtonColor: "#f28046",
       hidePoweredByCT: true,
-      serviceWorkerPath: '/web-sdk-test/js/clevertap_sw.js',
     });
   }
 
   function getLS() {
-    var LRU_CACHE = decodeURIComponent(localStorage["WZRK_X"]);
-    var WZRK_K = decodeURIComponent(localStorage["WZRK_K"]);
-    var WZRK_G = decodeURIComponent(localStorage["WZRK_G"]);
-    var WZRK_EV = decodeURIComponent(localStorage["WZRK_EV"]);
-    var WZRK_ARP = decodeURIComponent(localStorage["WZRK_ARP"]);
+    var LRU_CACHE = localStorage["WZRK_X"] ? decodeURIComponent(localStorage["WZRK_X"]) : "N/A";
+    var WZRK_K = localStorage["WZRK_K"] ? decodeURIComponent(localStorage["WZRK_K"]) : "N/A";
+    var WZRK_G = localStorage["WZRK_G"] ? decodeURIComponent(localStorage["WZRK_G"]) : "N/A";
+    var WZRK_EV = localStorage["WZRK_EV"] ? decodeURIComponent(localStorage["WZRK_EV"]) : "N/A";
+    var WZRK_ARP = localStorage["WZRK_ARP"] ? decodeURIComponent(localStorage["WZRK_ARP"]) : "N/A";
 
-    var data = `<div>WZRK_K: ${WZRK_K}</div><br /><div>WZRK_G: ${WZRK_G}</div><br /><div>LRU_CAHCE: ${LRU_CACHE}</div><br /><div>WZRK_EV: ${WZRK_EV}</div><br /><div>WZRK_ARP: ${WZRK_ARP}</div>`;
+    var data = `<div><strong>WZRK_K:</strong> ${WZRK_K}</div><br /><div><strong>WZRK_G (GUID):</strong> ${WZRK_G}</div><br /><div><strong>LRU_CACHE:</strong> ${LRU_CACHE}</div><br /><div><strong>WZRK_EV:</strong> ${WZRK_EV}</div><br /><div><strong>WZRK_ARP:</strong> ${WZRK_ARP}</div>`;
 
     document.getElementById("lsData").innerHTML = data;
   }
@@ -428,8 +421,6 @@
     console.log(customerType);
   }
 </script>
-
-<link rel="stylesheet" href="/web-sdk-test/style.css" />
 
 <div id="ct-banner" class="chetanclass">MAK HERE</div>
 
