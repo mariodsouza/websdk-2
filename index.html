@@ -130,7 +130,9 @@
 //		    wzrk.src = 'https://cdn.jsdelivr.net/gh/CleverTap/clevertap-web-sdk@0bf9c64c766192eeaf7e960249979ec2a209c74b/clevertap.js';
       //	    wzrk.src = 'https://cdn.jsdelivr.net/gh/CleverTap/clevertap-web-sdk@b9ec8b1a15b14aa44540c5eeb1091909b5719814/clevertap.js';
        // wzrk.src = 'https://cdn.jsdelivr.net/gh/CleverTap/clevertap-web-sdk@09394821ceb5bc7e6051b59d4f5172987e767f35/clevertap.js';
-      wzrk.src = 'https://cdn.jsdelivr.net/gh/CleverTap/clevertap-web-sdk@e770e27fc49f521c2f30206acfaa0a8a27ef725d/clevertap.js';
+      // wzrk.src = 'https://cdn.jsdelivr.net/gh/CleverTap/clevertap-web-sdk@e770e27fc49f521c2f30206acfaa0a8a27ef725d/clevertap.js';
+      // WEB-3904: Using staging SDK for customId OUL testing (PR #479)
+      wzrk.src = 'https://static.wizrocket.com/staging/task/WEB-3904/customId_OUL/js/clevertap.min.js';
 
         wzrk.onload = () => {
           console.log('loaded');
@@ -147,16 +149,8 @@
             hidePoweredByCT: true,
             serviceWorkerPath: '/web-sdk-test/js/clevertap_sw.js',
           });
-          // 	    console.log('clevertap.notifications', clevertap.notifications)
-          // 	    		clevertap.notifications.push({
-          //     "titleText": 'Wish to receive push notifications?',
-          //     "bodyText": 'Click Yes to receive push notifications',
-          //     "okButtonText": 'Yes',
-          //     "rejectButtonText": 'No',
-          // "serviceWorkerPath": '/web-sdk-test/js/clevertap_sw.js'});
         }
 
-        // wzrk.src = 'https://cdn.jsdelivr.net/gh/CleverTap/clevertap-web-sdk@master/clevertap.js';
         var s = document.getElementsByTagName("script")[0];
         s.parentNode.insertBefore(wzrk, s);
       })();
@@ -167,7 +161,6 @@
         EventTarget.prototype.dispatchEvent = function (event) {
           if (!(event instanceof Event)) return originalDispatch.call(this, event);
 
-          // Check if it's a CustomEvent
           if (event instanceof CustomEvent) {
             console.log("Custom Event Detected:", {
               type: event.type,
@@ -212,20 +205,8 @@
   function renderCartDropOffPersonalisationCampaign (data) {
     const name = data.kv.Name;
     const product = data.kv.Cart;
-
-    // Add your custom rendering logic here
-
-    // raise notification viewed event
     clevertap.renderNotificationViewed(data);
     clevertap.renderNotificationClicked(data);
-
-    /**
-     * You may want to track click on the entire popup that you just rendered or on a button within it.
-     * To do so, you’ll have to add below line within the click listeners of the popup/button
-     * `clevertap.renderNotificationClicked(data);`
-     * Ex: If you had a button with id shopNow and are using jQuery, you’d simply have to do
-     * $(‘#shopNow’).click(() => { clevertap.renderNotificationClicked(data); })
-     */
   }
 
 
@@ -233,18 +214,18 @@
     var id = makeid(5);
     clevertap.profile.push({
       Site: {
-        Name: "User " + id, // User's name
-        Email: id + "@clevertap.com", // User's email
-        Phone: "+917710004770", // User's phone with country code
-        Gender: "aasd", // Can be either M or F
-        Employed: "Y", // Can be either Y or N
-        Education: "Graduate", // Can be either School, College or Graduate
-        Married: "Y", // Can be either Y or N
-        DOB: $WZRK_WR.setDate(20150501), // Set date in format yyyymmdd
+        Name: "User " + id,
+        Email: id + "@clevertap.com",
+        Phone: "+917710004770",
+        Gender: "aasd",
+        Employed: "Y",
+        Education: "Graduate",
+        Married: "Y",
+        DOB: $WZRK_WR.setDate(20150501),
         Language: "Deutsche",
-        "MSG-email": true, // Disable email notifications
-        "MSG-push": true, // Enable push notifications
-        "MSG-sms": true // Enable sms notifications
+        "MSG-email": true,
+        "MSG-push": true,
+        "MSG-sms": true
       }
     });
     console.log("pushprofile successful");
@@ -300,37 +281,56 @@
     clevertap.logout();
   }
 
+  // WEB-3904: Helper to get customId value from input
+  function getCustomId() {
+    var val = document.getElementById("customIdInput").value.trim();
+    return val || null;
+  }
+
   function onClickOUL() {
-    clevertap.onUserLogin.push({
+    var customIdValue = getCustomId();
+    var oulPayload = {
       Site: {
-        Email: `qw${Math.ceil(
-          Math.random() * 10002312
-        )}@gmail.com`
-        // Email: "799726789@gmail.com"
+        Email: `qw${Math.ceil(Math.random() * 10002312)}@gmail.com`
       }
-    });
+    };
+    if (customIdValue) {
+      oulPayload.Site.customId = customIdValue;
+    }
+    clevertap.onUserLogin.push(oulPayload);
+    console.log("OUL pushed with payload:", JSON.stringify(oulPayload));
     getLS();
   }
 
   function onClickOULSame() {
     let value = document.getElementById("constantOUL").value;
-    clevertap.onUserLogin.push({
+    var customIdValue = getCustomId();
+    var oulPayload = {
       Site: {
-        // Email: `${Math.ceil(Math.random() * 100012)}@gmail.com`
         Email: `${value}@gmail.com`
       }
-    });
+    };
+    if (customIdValue) {
+      oulPayload.Site.customId = customIdValue;
+    }
+    clevertap.onUserLogin.push(oulPayload);
+    console.log("OUL pushed with payload:", JSON.stringify(oulPayload));
     getLS();
   }
 
   function onClickOULIdentitySame() {
     let value = document.getElementById("constantOULIdentity").value;
-    clevertap.onUserLogin.push({
+    var customIdValue = getCustomId();
+    var oulPayload = {
       Site: {
-        // Email: `${Math.ceil(Math.random() * 100012)}@gmail.com`
         Identity: `${value}`
       }
-    });
+    };
+    if (customIdValue) {
+      oulPayload.Site.customId = customIdValue;
+    }
+    clevertap.onUserLogin.push(oulPayload);
+    console.log("OUL pushed with payload:", JSON.stringify(oulPayload));
     getLS();
   }
 
@@ -391,16 +391,10 @@
   }
 
   function enablePush() {
-    // clevertap.notifications.push({
-    //     "titleText": 'Wish to receive push notifications?',
-    //     "bodyText": 'Click Yes to receive push notifications',
-    //     "okButtonText": 'Yes',
-    //     "rejectButtonText": 'No',
-    // "serviceWorkerPath": '/web-sdk-test/js/clevertap_sw.js'});
     clevertap.notifications.push({
-      apnsWebPushId: "web.com.localhost.pushDemo", //only for safari browser
+      apnsWebPushId: "web.com.localhost.pushDemo",
       apnsWebPushServiceUrl:
-        "https://us-central1-chetan-s-demo-app.cloudfunctions.net/api", //only for safari browser
+        "https://us-central1-chetan-s-demo-app.cloudfunctions.net/api",
       titleText: "Chetan Would you like to receive Push Notifications?",
       bodyText:
         "We promise to only send you relevant content and give you updates on your transactions",
@@ -436,35 +430,21 @@
 </script>
 
 <link rel="stylesheet" href="/web-sdk-test/style.css" />
-<!-- <br />
-<button type="button" onclick="pushprofile()">Profile Push!</button>
-<br />
-<button type="button" onclick="pushProductSearched()">
-    Product Searched
-</button>
-<br />
-<button type="button" onclick="pushEventAddToCart()">
-    Add to Cart!
-</button>
-<br />
-<button type="button" onclick="pushcharged()">Charged!</button>
-<br />
-<button type="button" onclick="pushbid()">Bid!</button>
-<br />
-<button type="button" onclick="logout()">Deprecated -> Logout</button>
-<br />
-<button type="button" onclick="clearLocalStorage()">
-    Clear Local Storage
-</button> -->
 
 <div id="ct-banner" class="chetanclass">MAK HERE</div>
 
 <div class="nav">
-  <!-- <span id="inbox">Whats New</span> -->
   <img id="bell-selector" src="https://img.icons8.com/emoji/48/000000/bell-emoji.png">
 </div>
 
 <h1>Test A-JS</h1>
+
+<!-- WEB-3904: customId for OUL testing -->
+<p><strong>Custom ID for OUL (WEB-3904)</strong></p>
+<input type="text" id="customIdInput" class="textInput" placeholder="e.g. _w_my_custom_id" />
+<small> (Leave empty for OUL without customId)</small>
+<br /><br />
+
 <button onclick="onClickPP()">Random PP</button>
 <button onclick="onClickOUL()">Random OUL</button>
 <button onclick="onClickEP()">Event Push</button>
